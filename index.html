@@ -2,116 +2,189 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <title>TERMINAL ٣٠٤</title>
     <style>
         * { box-sizing: border-box; }
-        body, html { margin: 0; padding: 0; height: 100%; background: #000; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; font-family: 'Segoe UI', sans-serif; overflow: hidden; color: #00f2ff; }
+        
+        /* INTRO MYSTÉRIEUSE */
+        #intro-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; padding: 30px; text-align: center; }
+        .intro-logo { width: 100px; height: 100px; border-radius: 50%; border: 2px solid #00f2ff; margin-bottom: 20px; object-fit: cover; box-shadow: 0 0 20px #00f2ff55; }
+        #typewriter { font-size: 17px; line-height: 1.6; max-width: 500px; min-height: 120px; text-shadow: 0 0 10px #00f2ff; font-family: 'Courier New', monospace; }
+        .options { display: none; gap: 20px; margin-top: 30px; }
+        .opt-btn { background: transparent; border: 1px solid #00f2ff; color: #00f2ff; padding: 12px 25px; cursor: pointer; font-family: inherit; transition: 0.3s; letter-spacing: 1px; font-weight: bold; }
+        .opt-btn:hover { background: #00f2ff; color: #000; box-shadow: 0 0 20px #00f2ff; }
 
-        /* ÉCRAN D'ATTENTE */
-        #splash {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 100;
-        }
-        .logo-load { color: #00f2ff; font-size: 80px; text-shadow: 0 0 20px #00f2ff; animation: pulse 1.5s infinite; }
+        /* CHARGEMENT */
+        #splash { display: none; position: fixed; inset: 0; background: #000; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        .logo-load { font-size: 80px; text-shadow: 0 0 20px #00f2ff; animation: pulse 1.5s infinite; }
         .barre-ext { width: 200px; height: 4px; background: #111; margin-top: 20px; border-radius: 2px; }
-        .barre-int { width: 0%; height: 100%; background: #00f2ff; border-radius: 2px; animation: load 3s forwards; }
+        .barre-int { width: 0%; height: 100%; background: #00f2ff; border-radius: 2px; box-shadow: 0 0 10px #00f2ff; }
 
-        /* INTERFACE DE CHAT */
-        #main-chat {
-            display: none; height: 100%; flex-direction: column;
-            background: url('https://i.ibb.co/TqTqjQd8/1000236508.jpg') no-repeat center center;
-            background-size: cover;
-        }
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 5, 10, 0.6); }
-
-        header {
-            position: relative; z-index: 10; background: #17212b; padding: 15px;
-            display: flex; align-items: center; border-bottom: 1px solid #00f2ff33;
-        }
-        .status-dot { width: 10px; height: 10px; background: #00f2ff; border-radius: 50%; margin-right: 10px; box-shadow: 0 0 5px #00f2ff; }
-
-        #chat-zone {
-            position: relative; z-index: 10; flex: 1; overflow-y: auto; padding: 20px;
-            display: flex; flex-direction: column;
-        }
-        .bubble {
-            max-width: 80%; padding: 12px; border-radius: 15px; margin-bottom: 10px;
-            color: #fff; font-size: 15px; line-height: 1.4;
-        }
+        /* INTERFACE TERMINAL */
+        #main-chat { display: none; height: 100%; flex-direction: column; background: url('https://i.ibb.co/TqTqjQd8/1000236508.jpg') no-repeat center center; background-size: cover; }
+        .overlay { position: absolute; inset: 0; background: rgba(0, 5, 10, 0.75); }
+        
+        header { position: relative; z-index: 10; background: #17212b; padding: 12px 15px; display: flex; align-items: center; border-bottom: 1px solid #00f2ff33; }
+        .header-logo { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #00f2ff; margin-right: 12px; object-fit: cover; }
+        
+        #chat-zone { position: relative; z-index: 10; flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
+        .bubble { max-width: 80%; padding: 12px; border-radius: 15px; margin-bottom: 10px; color: #fff; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
         .received { background: #182533; border: 1px solid #2b5278; align-self: flex-start; }
         .sent { background: #2b5278; align-self: flex-end; border-bottom-right-radius: 2px; }
-
-        .input-box {
-            position: relative; z-index: 10; background: #17212b; padding: 15px;
-            display: flex; align-items: center;
-        }
-        input {
-            flex: 1; background: #242f3d; border: 1px solid #00f2ff33;
-            padding: 12px; border-radius: 20px; color: #fff; outline: none;
-        }
-        button {
-            background: #00f2ff; border: none; width: 45px; height: 45px;
-            border-radius: 50%; margin-left: 10px; cursor: pointer; font-size: 20px;
-        }
-
+        
+        .input-box { position: relative; z-index: 10; background: #17212b; padding: 15px; display: flex; align-items: center; gap: 10px; }
+        input { flex: 1; background: #242f3d; border: 1px solid #00f2ff33; padding: 12px; border-radius: 20px; color: #fff; outline: none; }
+        .btn-action { background: #00f2ff; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; color: #000; }
+        
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        @keyframes load { 0% { width: 0%; } 100% { width: 100%; } }
     </style>
 </head>
 <body>
 
+    <div id="intro-screen">
+        <img src="https://i.ibb.co/TqTqjQd8/1000236508.jpg" class="intro-logo">
+        <div id="typewriter"></div>
+        <div class="options" id="options">
+            <button class="opt-btn" onclick="startSequence('yes')">POURSUIVRE</button>
+            <button class="opt-btn" onclick="startSequence('no')">ARRÊTER</button>
+        </div>
+    </div>
+
     <div id="splash">
         <div class="logo-load">٣٠٤</div>
-        <div style="color:#00f2ff; font-size:10px; letter-spacing:2px;">CRYPTAGE EN COURS...</div>
-        <div class="barre-ext"><div class="barre-int"></div></div>
+        <div style="font-size:10px; letter-spacing:2px;">CRYPTAGE DU CANAL...</div>
+        <div class="barre-ext"><div class="barre-int" id="progress"></div></div>
     </div>
 
     <div id="main-chat">
         <div class="overlay"></div>
         <header>
-            <div class="status-dot"></div>
+            <img src="https://i.ibb.co/TqTqjQd8/1000236508.jpg" class="header-logo">
             <div>
-                <div style="color:white; font-weight:bold;">Clan du Loup Noir</div>
-                <div style="color:#00f2ff; font-size:12px;">en ligne</div>
+                <div style="color:white; font-weight:bold; font-size:14px;">ORGANISATION DES LOUPS NOIRS</div>
+                <div style="color:#00f2ff; font-size:11px;">Liaison Directe : Active</div>
             </div>
         </header>
 
-        <div id="chat-zone">
-            <div class="bubble received">Liaison établie. Transmettez vos informations au Conseil.</div>
-        </div>
+        <div id="chat-zone"></div>
 
         <div class="input-box">
-            <input type="text" id="msgInput" placeholder="Message...">
-            <button onclick="send()">➤</button>
+            <label for="fileInput" class="btn-action">📎</label>
+            <input type="file" id="fileInput" onchange="sendFile()" style="display:none;">
+            <input type="text" id="msgInput" placeholder="Message secret...">
+            <button class="btn-action" onclick="send()">➤</button>
         </div>
     </div>
 
     <script>
-        setTimeout(() => {
-            document.getElementById('splash').style.display = 'none';
-            document.getElementById('main-chat').style.display = 'flex';
-        }, 3000);
+        // Force l'extension de la fenêtre Telegram
+        window.Telegram.WebApp.expand();
+
+        const token = "8046059525:AAF-BemSLt-jatd_s0gAxT7JDY77_o1LD_E";
+        const myId = "6633017977";
+        let lastMsgId = 0;
+
+        const introText = "Le Conseil du Clan des Loups Noirs vous a convoqué pour une affaire de haute importance...\n\nSujet : Dial Ndiaye.\n\nLe Conseil vous attend. Souhaitez-vous prouver votre aptitude ?";
+        
+        let i = 0;
+        function typeWriter() {
+            if (i < introText.length) {
+                let char = introText.charAt(i);
+                document.getElementById("typewriter").innerHTML += char === "\n" ? "<br>" : char;
+                i++;
+                setTimeout(typeWriter, 45);
+            } else {
+                document.getElementById("options").style.display = "flex";
+            }
+        }
+        window.onload = typeWriter;
+
+        // VERROUILLAGE TACTIQUE
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function () {
+            window.history.pushState(null, null, window.location.href);
+            addBubble("[ALERTE] SORTIE INTERDITE. UTILISEZ LA COMMANDE /exit", "received");
+        };
+
+        function startSequence(choice) {
+            if(choice === 'no') {
+                document.getElementById("typewriter").innerHTML = "Accès révoqué. Disparition des traces...";
+                document.getElementById("options").style.display = "none";
+                setTimeout(() => { window.Telegram.WebApp.close(); }, 2000);
+                return;
+            }
+            document.getElementById("intro-screen").style.display = "none";
+            document.getElementById("splash").style.display = "flex";
+            
+            let prog = 0;
+            let interval = setInterval(() => {
+                prog += 2;
+                document.getElementById("progress").style.width = prog + "%";
+                if(prog >= 100) {
+                    clearInterval(interval);
+                    document.getElementById("splash").style.display = "none";
+                    document.getElementById("main-chat").style.display = "flex";
+                    addBubble("Dial Ndiaye, l'entretien commence maintenant. Le Conseil vous observe.", "received");
+                }
+            }, 60);
+        }
+
+        function addBubble(text, type) {
+            const zone = document.getElementById('chat-zone');
+            const b = document.createElement('div');
+            b.className = "bubble " + type;
+            b.innerText = text;
+            zone.appendChild(b);
+            zone.scrollTop = zone.scrollHeight;
+        }
 
         function send() {
-            const token = "8046059525:AAF-BemSLt-jatd_s0gAxT7JDY77_o1LD_E";
-            const id = "6633017977";
             const val = document.getElementById('msgInput').value;
             if(!val) return;
 
-            const zone = document.getElementById('chat-zone');
-            const b = document.createElement('div');
-            b.className = "bubble sent";
-            b.innerText = val;
-            zone.appendChild(b);
-            zone.scrollTop = zone.scrollHeight;
+            // Commande de sortie secrète
+            if(val.toLowerCase() === '/exit') {
+                document.getElementById('main-chat').innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; color:#00f2ff; text-align:center; padding:20px; font-family:monospace;'>DÉCONNEXION EN COURS...<br>TRACES EFFACÉES.</div>";
+                setTimeout(() => { window.Telegram.WebApp.close(); }, 2000);
+                return;
+            }
 
-            fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${id}&text=${encodeURIComponent(val)}`, {mode: 'no-cors'});
-            
+            addBubble(val, "sent");
+            fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${myId}&text=${encodeURIComponent(val)}`);
             document.getElementById('msgInput').value = "";
         }
+
+        async function sendFile() {
+            const fileEl = document.getElementById('fileInput');
+            if (fileEl.files.length === 0) return;
+            const file = fileEl.files[0];
+            const formData = new FormData();
+            formData.append('chat_id', myId);
+            let method = file.type.startsWith('image/') ? "sendPhoto" : file.type.startsWith('video/') ? "sendVideo" : "sendDocument";
+            formData.append(method === "sendPhoto" ? "photo" : method === "sendVideo" ? "video" : "document", file);
+            addBubble("Transmission sécurisée : " + file.name, "sent");
+            await fetch(`https://api.telegram.org/bot${token}/${method}`, { method: 'POST', body: formData });
+            fileEl.value = "";
+        }
+
+        async function checkMessages() {
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${token}/getUpdates?offset=-1`);
+                const data = await response.json();
+                if (data.result && data.result.length > 0) {
+                    const msg = data.result[0].message;
+                    if (msg && msg.message_id !== lastMsgId && msg.chat.id.toString() === myId) {
+                        lastMsgId = msg.message_id;
+                        addBubble(msg.text || "[Rapport Multimédia Reçu]", "received");
+                    }
+                }
+            } catch (e) {}
+            setTimeout(checkMessages, 2500);
+        }
+        checkMessages();
     </script>
 </body>
-  </html>
-  
+</html>
