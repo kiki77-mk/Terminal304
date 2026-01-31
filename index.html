@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TERMINAL ٣٠٤</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+
+        /* ÉCRAN D'ATTENTE */
+        #splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 100;
+        }
+        .logo-load { color: #00f2ff; font-size: 80px; text-shadow: 0 0 20px #00f2ff; animation: pulse 1.5s infinite; }
+        .barre-ext { width: 200px; height: 4px; background: #111; margin-top: 20px; border-radius: 2px; }
+        .barre-int { width: 0%; height: 100%; background: #00f2ff; border-radius: 2px; animation: load 3s forwards; }
+
+        /* INTERFACE DE CHAT */
+        #main-chat {
+            display: none; height: 100%; flex-direction: column;
+            background: url('https://i.ibb.co/V9m8vYm/wolf-logo.png') no-repeat center center;
+            background-size: cover;
+        }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 5, 10, 0.8); }
+
+        header {
+            position: relative; z-index: 10; background: #17212b; padding: 15px;
+            display: flex; align-items: center; border-bottom: 1px solid #00f2ff33;
+        }
+        .status-dot { width: 10px; height: 10px; background: #00f2ff; border-radius: 50%; margin-right: 10px; box-shadow: 0 0 5px #00f2ff; }
+
+        #chat-zone {
+            position: relative; z-index: 10; flex: 1; overflow-y: auto; padding: 20px;
+            display: flex; flex-direction: column;
+        }
+        .bubble {
+            max-width: 80%; padding: 12px; border-radius: 15px; margin-bottom: 10px;
+            color: #fff; font-size: 15px; line-height: 1.4;
+        }
+        .received { background: #182533; border: 1px solid #2b5278; align-self: flex-start; }
+        .sent { background: #2b5278; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+        .input-box {
+            position: relative; z-index: 10; background: #17212b; padding: 15px;
+            display: flex; align-items: center;
+        }
+        input {
+            flex: 1; background: #242f3d; border: 1px solid #00f2ff33;
+            padding: 12px; border-radius: 20px; color: #fff; outline: none;
+        }
+        button {
+            background: #00f2ff; border: none; width: 45px; height: 45px;
+            border-radius: 50%; margin-left: 10px; cursor: pointer; font-size: 20px;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes load { 0% { width: 0%; } 100% { width: 100%; } }
+    </style>
+</head>
+<body>
+
+    <div id="splash">
+        <div class="logo-load">٣٠٤</div>
+        <div style="color:#00f2ff; font-size:10px; letter-spacing:2px;">CRYPTAGE EN COURS...</div>
+        <div class="barre-ext"><div class="barre-int"></div></div>
+    </div>
+
+    <div id="main-chat">
+        <div class="overlay"></div>
+        <header>
+            <div class="status-dot"></div>
+            <div>
+                <div style="color:white; font-weight:bold;">Clan du Loup Noir</div>
+                <div style="color:#00f2ff; font-size:12px;">en ligne</div>
+            </div>
+        </header>
+
+        <div id="chat-zone">
+            <div class="bubble received">Liaison établie. Transmettez vos informations au Conseil.</div>
+        </div>
+
+        <div class="input-box">
+            <input type="text" id="msgInput" placeholder="Message...">
+            <button onclick="send()">➤</button>
+        </div>
+    </div>
+
+    <script>
+        // Transition automatique après 3 secondes
+        setTimeout(() => {
+            document.getElementById('splash').style.display = 'none';
+            document.getElementById('main-chat').style.display = 'flex';
+        }, 3000);
+
+        function send() {
+            const token = "8046059525:AAF-BemSLt-jatd_s0gAxT7JDY77_o1LD_E";
+            const id = "6633017977";
+            const val = document.getElementById('msgInput').value;
+            if(!val) return;
+
+            // Ajout bulle locale
+            const zone = document.getElementById('chat-zone');
+            const b = document.createElement('div');
+            b.className = "bubble sent";
+            b.innerText = val;
+            zone.appendChild(b);
+            zone.scrollTop = zone.scrollHeight;
+
+            // Envoi Telegram
+            fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${id}&text=${encodeURIComponent(val)}`, {mode: 'no-cors'});
+            
+            document.getElementById('msgInput').value = "";
+        }
+    </script>
+</body>
+</html>
