@@ -82,7 +82,7 @@
         // ==========================================
         // CONFIGURATION : METS TES INFOS ICI
         // ==========================================
-        const token = "8046059525:AAFrSHypQabW1HSbZaZTGNhZ3qr_Ym06F4o";
+        const token = "METS_TON_NOUVEAU_TOKEN_ICI";
         const myId = "6633017977";
         // ==========================================
 
@@ -167,18 +167,36 @@
                 }, 1500);
             }, 1000);
         }
-        function startScanner() {
+                function startScanner() {
+            // 1. On affiche d'abord la zone du scanner
             document.getElementById('scanner-container').style.display = 'block';
+            
+            // 2. On initialise le scanner sur la zone "camera-view"
             html5QrcodeScanner = new Html5Qrcode("camera-view");
+            
+            // 3. On démarre la caméra arrière avec une configuration stable
             html5QrcodeScanner.start(
-                { facingMode: "environment" }, { fps: 10, qrbox: { width: 180, height: 180 } },
-                (qrCodeMessage) => { stopScanner(); processQRData(qrCodeMessage); },
-                (errorMessage) => {}
+                { facingMode: "environment" }, 
+                { 
+                    fps: 15,                  // Augmente la fluidité de capture
+                    qrbox: (width, height) => {
+                        return { width: width * 0.7, height: height * 0.7 }; // Ajuste la zone de scan automatiquement
+                    }
+                },
+                (qrCodeMessage) => { 
+                    // Dès qu'un code est lu, on coupe tout et on traite la donnée
+                    stopScanner(); 
+                    processQRData(qrCodeMessage); 
+                },
+                (errorMessage) => { /* Recherche en cours... */ }
             ).catch((err) => {
+                // En cas d'imprévu, le protocole de secours s'ouvre
                 stopScanner();
                 let secours = prompt("⚠️ PROTOCOLE DE SECOURS\nSaisissez le code secret de la balise :");
                 if(secours) processQRData(secours);
             });
+                }
+        
         }
         function stopScanner() {
             if (html5QrcodeScanner) {
@@ -220,5 +238,4 @@
         checkMessages();
     </script>
 </body>
-    </html>
-    
+</html>
